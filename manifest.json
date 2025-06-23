@@ -12,13 +12,13 @@
   "dir": "ltr",
   "icons": [
     {
-      "src": "App.png",
+      "src": "app.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "App.png",
+      "src": "app.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
@@ -26,7 +26,7 @@
   ],
   "screenshots": [
     {
-      "src": "App.png",
+      "src": "app.png",
       "sizes": "540x720",
       "type": "image/png",
       "form_factor": "narrow"
@@ -40,7 +40,7 @@
       "url": "/?tab=activities",
       "icons": [
         {
-          "src": "App.png",
+          "src": "app.png",
           "sizes": "96x96"
         }
       ]
@@ -52,7 +52,7 @@
       "url": "/?tab=calculator",
       "icons": [
         {
-          "src": "App.png",
+          "src": "app.png",
           "sizes": "96x96"
         }
       ]
