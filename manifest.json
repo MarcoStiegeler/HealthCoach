@@ -1,0 +1,61 @@
+{
+  "name": "VitalAge - Biological Age Optimizer",
+  "short_name": "VitalAge",
+  "description": "Science-based longevity optimization through personalized health tracking and biological age calculation",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3b82f6",
+  "orientation": "portrait-primary",
+  "categories": ["health", "lifestyle", "productivity", "medical"],
+  "lang": "en",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "App.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "App.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "App.png",
+      "sizes": "540x720",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Daily Activities",
+      "short_name": "Daily",
+      "description": "Track your daily health activities",
+      "url": "/?tab=activities",
+      "icons": [
+        {
+          "src": "App.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Health Calculator",
+      "short_name": "Calculator",
+      "description": "Calculate your biological age",
+      "url": "/?tab=calculator",
+      "icons": [
+        {
+          "src": "App.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ]
+}

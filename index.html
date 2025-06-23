@@ -1,0 +1,2316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VitalAge - Biological Age Optimizer</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#3b82f6">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ef4444'><path d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/></svg>">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #1f2937;
+        }
+
+        .app-container {
+            max-width: 428px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .header.hidden {
+            transform: translateY(-100%);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.25rem;
+        }
+
+        .header-text {
+            flex: 1;
+        }
+
+        .app-title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: #1f2937;
+        }
+
+        .app-subtitle {
+            font-size: 0.75rem;
+            color: #6b7280;
+        }
+
+        .header-badges {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .badge {
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .badge-success {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .badge-warning {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge-info {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .badge-danger {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .dashboard {
+            padding: 1rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .metric-card {
+            padding: 1rem;
+            border-radius: 12px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        }
+
+        .metric-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .aging-rate {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+
+        .biological-age {
+            background: linear-gradient(135deg, #3b82f6, #0ea5e9);
+        }
+
+        .health-score {
+            background: linear-gradient(135deg, #8b5cf6, #ec4899);
+        }
+
+        .life-expectancy {
+            background: linear-gradient(135deg, #f59e0b, #ef4444);
+        }
+
+        .metric-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .metric-label {
+            font-size: 0.75rem;
+            opacity: 0.9;
+        }
+
+        .metric-sublabel {
+            font-size: 0.625rem;
+            opacity: 0.8;
+            margin-top: 0.25rem;
+        }
+
+        .tabs {
+            background: white;
+            border-top: 1px solid #e5e7eb;
+            overflow-x: auto;
+            white-space: nowrap;
+            padding: 0 1rem;
+        }
+
+        .tab-list {
+            display: flex;
+            gap: 0.5rem;
+            padding: 0.5rem 0;
+        }
+
+        .tab-button {
+            padding: 0.5rem 1rem;
+            border: none;
+            background: #f3f4f6;
+            color: #6b7280;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .tab-button.active {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .tab-content {
+            padding: 1rem;
+            min-height: 60vh;
+        }
+
+        .tab-panel {
+            display: none;
+        }
+
+        .tab-panel.active {
+            display: block;
+        }
+
+        .activity-grid {
+            display: grid;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .activity-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1rem;
+            border: 2px solid #e5e7eb;
+            transition: all 0.2s;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .activity-card.completed {
+            border-color: #10b981;
+            background: #f0fdf4;
+        }
+
+        .activity-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .activity-title {
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .toggle-button {
+            width: 50px;
+            height: 28px;
+            border-radius: 14px;
+            border: none;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s;
+            background: #d1d5db;
+        }
+
+        .toggle-button.active {
+            background: #10b981;
+        }
+
+        .toggle-button::after {
+            content: '';
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: white;
+            top: 2px;
+            left: 2px;
+            transition: all 0.2s;
+        }
+
+        .toggle-button.active::after {
+            transform: translateX(22px);
+        }
+
+        .streak-info {
+            font-size: 0.875rem;
+            color: #6b7280;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-button {
+            background: #dbeafe;
+            color: #1d4ed8;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .input-group {
+            margin-bottom: 1rem;
+        }
+
+        .input-label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: #374151;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: #3b82f6;
+        }
+
+        .slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #e5e7eb;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+        }
+
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+            border: none;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .info-box {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .info-box.blue {
+            background: #dbeafe;
+            border-color: #3b82f6;
+        }
+
+        .info-box.green {
+            background: #dcfce7;
+            border-color: #10b981;
+        }
+
+        .info-box.gray {
+            background: #f3f4f6;
+            border-color: #6b7280;
+        }
+
+        .info-box.red {
+            background: #fee2e2;
+            border-color: #ef4444;
+        }
+
+        .button {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 0.875rem;
+        }
+
+        .button-primary {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .button-primary:hover {
+            background: #2563eb;
+        }
+
+        .button-secondary {
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .button-success {
+            background: #10b981;
+            color: white;
+        }
+
+        .button-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #10b981;
+            transition: width 0.3s ease;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            max-width: 400px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .modal-title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            flex: 1;
+        }
+
+        .close-button {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #6b7280;
+        }
+
+        .notification-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+        }
+
+        .notification-info {
+            flex: 1;
+        }
+
+        .notification-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .notification-time {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        /* Biological Age Visualization */
+        .age-visualization {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .age-timeline {
+            position: relative;
+            height: 60px;
+            background: linear-gradient(90deg, #10b981 0%, #f59e0b 50%, #ef4444 100%);
+            border-radius: 30px;
+            margin: 1rem 0;
+            overflow: hidden;
+        }
+
+        .age-marker {
+            position: absolute;
+            top: -10px;
+            width: 4px;
+            height: 80px;
+            background: #1f2937;
+            border-radius: 2px;
+        }
+
+        .age-marker::after {
+            content: attr(data-age);
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #1f2937;
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .speedometer {
+            position: relative;
+            width: 200px;
+            height: 100px;
+            margin: 2rem auto;
+        }
+
+        .speedometer-arc {
+            width: 200px;
+            height: 100px;
+            border: 8px solid #e5e7eb;
+            border-bottom: none;
+            border-radius: 100px 100px 0 0;
+            position: relative;
+        }
+
+        .speedometer-needle {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            width: 2px;
+            height: 80px;
+            background: #ef4444;
+            transform-origin: bottom;
+            transition: transform 0.5s ease;
+        }
+
+        .speedometer-center {
+            position: absolute;
+            bottom: -5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 10px;
+            height: 10px;
+            background: #1f2937;
+            border-radius: 50%;
+        }
+
+        .biomarker-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            border: 1px solid #e5e7eb;
+            margin-bottom: 1rem;
+        }
+
+        .biomarker-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .biomarker-name {
+            font-weight: 600;
+            color: #1f2937;
+        }
+
+        .biomarker-value {
+            font-weight: 700;
+            color: #3b82f6;
+        }
+
+        .biomarker-comparison {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0.5rem 0;
+        }
+
+        .comparison-bar {
+            flex: 1;
+            height: 6px;
+            background: #e5e7eb;
+            border-radius: 3px;
+            position: relative;
+        }
+
+        .comparison-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        .comparison-marker {
+            position: absolute;
+            top: -2px;
+            width: 2px;
+            height: 10px;
+            background: #1f2937;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        @media (max-width: 480px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .grid-3 {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header class="header" id="header">
+            <div class="header-content">
+                <div class="logo">❤️</div>
+                <div class="header-text">
+                    <div class="app-title">VitalAge</div>
+                    <div class="app-subtitle">Biological Age Optimizer</div>
+                </div>
+                <div class="header-badges">
+                    <div class="badge badge-success" id="health-score-badge">85/100</div>
+                    <div class="badge badge-info" id="aging-rate-badge">0.85x</div>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <section class="dashboard">
+                <div class="metric-card aging-rate" onclick="showAgingRateDetails()">
+                    <div class="metric-content">
+                        <div class="metric-value" id="aging-rate-value">0.85x</div>
+                        <div class="metric-label">Aging Rate</div>
+                        <div class="badge badge-success" style="margin-top: 0.5rem;" id="aging-status">Excellent</div>
+                    </div>
+                </div>
+                <div class="metric-card biological-age" onclick="showBiologicalAgeViz()">
+                    <div class="metric-content">
+                        <div class="metric-value" id="biological-age-value">32</div>
+                        <div class="metric-label">Biological Age</div>
+                        <div class="metric-sublabel" id="age-difference">3 years younger</div>
+                    </div>
+                </div>
+                <div class="metric-card health-score" onclick="showHealthScoreDetails()">
+                    <div class="metric-content">
+                        <div class="metric-value" id="health-score-value">85</div>
+                        <div class="metric-label">Health Score</div>
+                        <div class="progress-bar" style="margin-top: 0.5rem;">
+                            <div class="progress-fill" id="health-progress" style="width: 85%;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="metric-card life-expectancy" onclick="showLifeExpectancyDetails()">
+                    <div class="metric-content">
+                        <div class="metric-value" id="life-expectancy-value">89</div>
+                        <div class="metric-label">Life Expectancy</div>
+                        <div class="metric-sublabel" id="expectancy-gain">+7 years gained</div>
+                    </div>
+                </div>
+            </section>
+
+            <nav class="tabs">
+                <div class="tab-list">
+                    <button class="tab-button active" data-tab="activities">Daily</button>
+                    <button class="tab-button" data-tab="biomarkers">Biomarkers</button>
+                    <button class="tab-button" data-tab="calculator">Calculator</button>
+                    <button class="tab-button" data-tab="training">Training</button>
+                    <button class="tab-button" data-tab="analysis">Analysis</button>
+                    <button class="tab-button" data-tab="recommendations">Tips</button>
+                    <button class="tab-button" data-tab="progress">Progress</button>
+                    <button class="tab-button" data-tab="settings">Settings</button>
+                </div>
+            </nav>
+
+            <div class="tab-content">
+                <!-- Daily Activities Tab -->
+                <div class="tab-panel active" id="activities">
+                    <div class="activity-grid">
+                        <div class="activity-card" id="exercise-card">
+                            <div class="activity-header">
+                                <div class="activity-title">🏃‍♂️ Exercise</div>
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <button class="info-button" onclick="showScientificInfo('exercise')">i</button>
+                                    <button class="toggle-button" id="exercise-toggle" onclick="toggleActivity('exercise')"></button>
+                                </div>
+                            </div>
+                            <div class="streak-info">Current streak: <span id="exercise-streak">5</span> days</div>
+                            <div style="font-size: 0.75rem; color: #10b981;">Impact: -0.08 aging rate</div>
+                        </div>
+
+                        <div class="activity-card" id="meditation-card">
+                            <div class="activity-header">
+                                <div class="activity-title">🧘‍♀️ Meditation</div>
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <button class="info-button" onclick="showScientificInfo('meditation')">i</button>
+                                    <button class="toggle-button" id="meditation-toggle" onclick="toggleActivity('meditation')"></button>
+                                </div>
+                            </div>
+                            <div class="streak-info">Current streak: <span id="meditation-streak">3</span> days</div>
+                            <div style="font-size: 0.75rem; color: #10b981;">Impact: -0.05 aging rate</div>
+                        </div>
+
+                        <div class="activity-card" id="journaling-card">
+                            <div class="activity-header">
+                                <div class="activity-title">📝 Journaling</div>
+                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <button class="info-button" onclick="showScientificInfo('journaling')">i</button>
+                                    <button class="toggle-button" id="journaling-toggle" onclick="toggleActivity('journaling')"></button>
+                                </div>
+                            </div>
+                            <div class="streak-info">Current streak: <span id="journaling-streak">7</span> days</div>
+                            <div style="font-size: 0.75rem; color: #10b981;">Impact: -0.03 aging rate</div>
+                        </div>
+                    </div>
+
+                    <div class="grid-2">
+                        <div class="input-group">
+                            <label class="input-label">🛏️ Bedtime</label>
+                            <input type="time" class="input-field" id="bedtime" value="22:30" onchange="calculateSleepHours()">
+                        </div>
+                        <div class="input-group">
+                            <label class="input-label">🌅 Wake Time</label>
+                            <input type="time" class="input-field" id="waketime" value="06:30" onchange="calculateSleepHours()">
+                        </div>
+                        <div class="input-group">
+                            <label class="input-label">🥬 Vegetables (servings)</label>
+                            <input type="range" class="slider" id="vegetables" min="0" max="10" value="6" oninput="updateSliderValue('vegetables')" onchange="calculateMetrics()">
+                            <div style="text-align: center; margin-top: 0.5rem;"><span id="vegetables-value">6</span> servings</div>
+                        </div>
+                        <div class="input-group">
+                            <label class="input-label">💧 Water (glasses)</label>
+                            <input type="range" class="slider" id="water" min="0" max="15" value="8" oninput="updateSliderValue('water')" onchange="calculateMetrics()">
+                            <div style="text-align: center; margin-top: 0.5rem;"><span id="water-value">8</span> glasses</div>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label class="input-label">💊 Supplements</label>
+                        <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+                            <input type="text" class="input-field" id="supplement-input" placeholder="Add supplement..." onkeypress="handleSupplementKeyPress(event)">
+                            <button class="button button-primary" onclick="addSupplement()">Add</button>
+                        </div>
+                        <div id="supplements-list"></div>
+                    </div>
+
+                    <div class="grid-2">
+                        <div class="input-group">
+                            <label class="input-label">😊 Mood</label>
+                            <input type="range" class="slider" id="mood" min="1" max="10" value="7" oninput="updateSliderValue('mood')" onchange="calculateMetrics()">
+                            <div style="text-align: center; margin-top: 0.5rem;"><span id="mood-value">7</span>/10 <span id="mood-emoji">😊</span></div>
+                        </div>
+                        <div class="input-group">
+                            <label class="input-label">⚡ Energy</label>
+                            <input type="range" class="slider" id="energy" min="1" max="10" value="8" oninput="updateSliderValue('energy')" onchange="calculateMetrics()">
+                            <div style="text-align: center; margin-top: 0.5rem;"><span id="energy-value">8</span>/10 <span id="energy-emoji">⚡</span></div>
+                        </div>
+                    </div>
+
+                    <div id="journal-section" class="hidden">
+                        <div class="input-group">
+                            <label class="input-label">📖 Journal Entry</label>
+                            <textarea class="input-field" id="journal-entry" rows="4" placeholder="What's on your mind today?" onchange="saveJournalEntry()"></textarea>
+                        </div>
+                        <div class="info-box">
+                            <strong>Journaling Prompts:</strong><br>
+                            • What am I grateful for today?<br>
+                            • What did I learn today?<br>
+                            • How can I improve tomorrow?<br>
+                            • What challenged me and how did I grow?
+                        </div>
+                    </div>
+
+                    <div class="info-box gray">
+                        <strong>💡 Consistency is Key:</strong> Small, regular improvements have a greater impact on longevity than occasional large efforts. Your daily choices compound over time.
+                    </div>
+
+                    <div class="grid-3">
+                        <div style="text-align: center; padding: 1rem; background: #f0fdf4; border-radius: 8px;">
+                            <div style="font-size: 1.5rem; font-weight: 700; color: #166534;" id="activities-today">2/3</div>
+                            <div style="font-size: 0.75rem; color: #166534;">Activities Today</div>
+                        </div>
+                        <div style="text-align: center; padding: 1rem; background: #fef3c7; border-radius: 8px;">
+                            <div style="font-size: 1.5rem; font-weight: 700; color: #92400e;" id="best-streak">7</div>
+                            <div style="font-size: 0.75rem; color: #92400e;">Best Streak</div>
+                        </div>
+                        <div style="text-align: center; padding: 1rem; background: #dbeafe; border-radius: 8px;">
+                            <div style="font-size: 1.5rem; font-weight: 700; color: #1d4ed8;" id="aging-reduction">-0.16</div>
+                            <div style="font-size: 0.75rem; color: #1d4ed8;">Rate Reduction</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Biomarkers Tab -->
+                <div class="tab-panel" id="biomarkers">
+                    <div class="info-box blue">
+                        <h3>🧬 Biomarker Analysis</h3>
+                        <p>Estimated biomarkers based on your lifestyle data compared to age-matched peers.</p>
+                    </div>
+
+                    <div class="biomarker-card">
+                        <div class="biomarker-header">
+                            <span class="biomarker-name">Resting Heart Rate</span>
+                            <span class="biomarker-value" id="rhr-value">58 bpm</span>
+                        </div>
+                        <div class="biomarker-comparison">
+                            <span style="font-size: 0.75rem;">Poor</span>
+                            <div class="comparison-bar">
+                                <div class="comparison-fill" style="width: 75%; background: #10b981;"></div>
+                                <div class="comparison-marker" style="left: 50%;"></div>
+                                <div class="comparison-marker" style="left: 75%; background: #3b82f6;"></div>
+                            </div>
+                            <span style="font-size: 0.75rem;">Excellent</span>
+                        </div>
+                        <div style="font-size: 0.75rem; color: #6b7280;">
+                            Age average: 72 bpm | Your percentile: 85th
+                        </div>
+                        <div class="badge badge-success" style="margin-top: 0.5rem;">Excellent</div>
+                    </div>
+
+                    <div class="biomarker-card">
+                        <div class="biomarker-header">
+                            <span class="biomarker-name">VO2 Max</span>
+                            <span class="biomarker-value" id="vo2-value">45 ml/kg/min</span>
+                        </div>
+                        <div class="biomarker-comparison">
+                            <span style="font-size: 0.75rem;">Poor</span>
+                            <div class="comparison-bar">
+                                <div class="comparison-fill" style="width: 70%; background: #10b981;"></div>
+                                <div class="comparison-marker" style="left: 40%;"></div>
+                                <div class="comparison-marker" style="left: 70%; background: #3b82f6;"></div>
+                            </div>
+                            <span style="font-size: 0.75rem;">Excellent</span>
+                        </div>
+                        <div style="font-size: 0.75rem; color: #6b7280;">
+                            Age average: 35 ml/kg/min | Your percentile: 78th
+                        </div>
+                        <div class="badge badge-success" style="margin-top: 0.5rem;">Good</div>
+                    </div>
+
+                    <div class="biomarker-card">
+                        <div class="biomarker-header">
+                            <span class="biomarker-name">HbA1c</span>
+                            <span class="biomarker-value" id="hba1c-value">5.2%</span>
+                        </div>
+                        <div class="biomarker-comparison">
+                            <span style="font-size: 0.75rem;">Poor</span>
+                            <div class="comparison-bar">
+                                <div class="comparison-fill" style="width: 85%; background: #10b981;"></div>
+                                <div class="comparison-marker" style="left: 60%;"></div>
+                                <div class="comparison-marker" style="left: 85%; background: #3b82f6;"></div>
+                            </div>
+                            <span style="font-size: 0.75rem;">Excellent</span>
+                        </div>
+                        <div style="font-size: 0.75rem; color: #6b7280;">
+                            Age average: 5.7% | Your percentile: 92nd
+                        </div>
+                        <div class="badge badge-success" style="margin-top: 0.5rem;">Excellent</div>
+                    </div>
+
+                    <div class="biomarker-card">
+                        <div class="biomarker-header">
+                            <span class="biomarker-name">C-Reactive Protein</span>
+                            <span class="biomarker-value" id="crp-value">0.8 mg/L</span>
+                        </div>
+                        <div class="biomarker-comparison">
+                            <span style="font-size: 0.75rem;">Poor</span>
+                            <div class="comparison-bar">
+                                <div class="comparison-fill" style="width: 80%; background: #10b981;"></div>
+                                <div class="comparison-marker" style="left: 55%;"></div>
+                                <div class="comparison-marker" style="left: 80%; background: #3b82f6;"></div>
+                            </div>
+                            <span style="font-size: 0.75rem;">Excellent</span>
+                        </div>
+                        <div style="font-size: 0.75rem; color: #6b7280;">
+                            Age average: 2.1 mg/L | Your percentile: 88th
+                        </div>
+                        <div class="badge badge-success" style="margin-top: 0.5rem;">Excellent</div>
+                    </div>
+
+                    <div class="info-box green">
+                        <strong>🎯 Key Insights:</strong><br>
+                        • Your cardiovascular markers are excellent<br>
+                        • Metabolic health is optimal<br>
+                        • Low inflammation levels indicate good recovery<br>
+                        • Continue current lifestyle patterns
+                    </div>
+                </div>
+
+                <!-- Calculator Tab -->
+                <div class="tab-panel" id="calculator">
+                    <div class="info-box blue">
+                        <h3>🧮 Personal Health Calculator</h3>
+                        <p>Input your health parameters to calculate your biological age and aging rate.</p>
+                    </div>
+
+                    <div class="input-group">
+                        <label class="input-label">👤 Chronological Age</label>
+                        <input type="number" class="input-field" id="age" value="35" min="18" max="100" onchange="calculateMetrics()">
+                    </div>
+
+                    <div class="grid-2">
+                        <div class="input-group">
+                            <label class="input-label">⚖️ Weight (kg)</label>
+                            <input type="number" class="input-field" id="weight" value="75" min="40" max="200" onchange="calculateMetrics()">
+                        </div>
+                        <div class="input-group">
+                            <label class="input-label">📏 Height (cm)</label>
+                            <input type="number" class="input-field" id="height" value="175" min="140" max="220" onchange="calculateMetrics()">
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label class="input-label">😴 Sleep Duration (hours)</label>
+                        <input type="range" class="slider" id="sleep-hours" min="4" max="12" value="7.5" step="0.5" oninput="updateSliderValue('sleep-hours')" onchange="calculateMetrics()">
+                        <div style="text-align: center; margin-top: 0.5rem;">
+                            <span id="sleep-hours-value">7.5</span> hours
+                            <span class="badge badge-success" id="sleep-optimal" style="margin-left: 0.5rem;">Optimal</span>
+                        </div>
+                        <div style="font-size: 0.75rem; color: #6b7280; text-align: center; margin-top: 0.25rem;">
+                            Optimal range: 7-8.5 hours
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label class="input-label">🚶‍♂️ Daily Steps</label>
+                        <input type="range" class="slider" id="steps" min="1000" max="20000" value="10000" step="500" oninput="updateSliderValue('steps')" onchange="calculateMetrics()">
+                        <div style="text-align: center; margin-top: 0.5rem;">
+                            <span id="steps-value">10000</span> steps
+                            <span class="badge badge-success" id="steps-optimal" style="margin-left: 0.5rem;">Optimal</span>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label class="input-label">🏋️‍♂️ Exercise (minutes/day)</label>
+                        <input type="range" class="slider" id="exercise-minutes" min="0" max="120" value="45" oninput="updateSliderValue('exercise-minutes')" onchange="calculateMetrics()">
+                        <div style="text-align: center; margin-top: 0.5rem;"><span id="exercise-minutes-value">45</span> minutes</div>
+                    </div>
+
+                    <div class="input-group">
+                        <label class="input-label">😰 Stress Level (1-10)</label>
+                        <input type="range" class="slider" id="stress-level" min="1" max="10" value="4" oninput="updateSliderValue('stress-level')" onchange="calculateMetrics()">
+                        <div style="text-align: center; margin-top: 0.5rem;">
+                            <span id="stress-level-value">4</span>/10
+                            <span id="stress-emoji">😌</span>
+                        </div>
+                    </div>
+
+                    <div class="grid-2">
+                        <div class="input-group">
+                            <label class="input-label">🚬 Cigarettes/day</label>
+                            <input type="range" class="slider" id="cigarettes" min="0" max="40" value="0" oninput="updateSliderValue('cigarettes')" onchange="calculateMetrics()">
+                            <div style="text-align: center; margin-top: 0.5rem;">
+                                <span id="cigarettes-value">0</span>
+                                <span class="badge badge-success" id="cigarettes-status">Excellent</span>
+                            </div>
+                        </div>
+                        <div class="input-group">
+                            <label class="input-label">🍷 Alcohol units/week</label>
+                            <input type="range" class="slider" id="alcohol" min="0" max="30" value="3" oninput="updateSliderValue('alcohol')" onchange="calculateMetrics()">
+                            <div style="text-align: center; margin-top: 0.5rem;">
+                                <span id="alcohol-value">3</span> units
+                                <span class="badge badge-success" id="alcohol-status">Good</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid-2" style="margin-top: 1rem;">
+                        <button class="button button-primary" onclick="setOptimalValues()" style="width: 100%;">
+                            Set Optimal Values
+                        </button>
+                        <button class="button button-secondary" onclick="resetToDefaults()" style="width: 100%;">
+                            Reset to Defaults
+                        </button>
+                    </div>
+
+                    <div class="info-box gray" style="margin-top: 1rem;">
+                        <strong>📊 Current Calculation:</strong><br>
+                        Biological Age: <span id="calc-bio-age">32 years</span><br>
+                        Aging Rate: <span id="calc-aging-rate">0.85x normal</span><br>
+                        Life Expectancy: <span id="calc-life-exp">89 years</span>
+                    </div>
+                </div>
+
+                <!-- Training Tab -->
+                <div class="tab-panel" id="training">
+                    <div style="text-align: center; margin-bottom: 2rem;">
+                        <div style="background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 12px; padding: 2rem; margin-bottom: 1rem; color: white;">
+                            <div style="font-size: 3rem; margin-bottom: 1rem;">🎥</div>
+                            <h3>Bryan Johnson Blueprint</h3>
+                            <p style="margin: 0.5rem 0; opacity: 0.9;">The Science of Reversing Aging</p>
+                            <p style="font-size: 0.875rem; opacity: 0.8;">Duration: 45 minutes</p>
+                            <button class="button button-primary" onclick="playVideo()" style="margin-top: 1rem; background: rgba(255,255,255,0.2); backdrop-filter: blur(10px);">
+                                ▶️ Watch Video
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="info-box blue">
+                        <h4>🎯 Key Learning Points:</h4>
+                        <ul style="margin: 0.5rem 0; padding-left: 1.5rem;">
+                            <li><strong>Sleep Optimization:</strong> 8+ hours with consistent schedule</li>
+                            <li><strong>Nutritional Precision:</strong> Caloric restriction with optimal nutrition</li>
+                            <li><strong>Exercise Protocol:</strong> Strength, cardio, and flexibility training</li>
+                            <li><strong>Biomarker Tracking:</strong> Regular testing and optimization</li>
+                            <li><strong>Stress Management:</strong> Meditation and recovery protocols</li>
+                        </ul>
+                    </div>
+
+                    <div class="info-box green">
+                        <h4>🔬 How This Applies to You:</h4>
+                        <p>Based on your current data, focus on:</p>
+                        <ul style="margin: 0.5rem 0; padding-left: 1.5rem;" id="personalized-recommendations">
+                            <li>Maintaining your excellent sleep schedule</li>
+                            <li>Increasing vegetable intake to 8+ servings</li>
+                            <li>Adding 15 minutes to daily exercise</li>
+                            <li>Implementing stress reduction techniques</li>
+                        </ul>
+                    </div>
+
+                    <div class="info-box red">
+                        <strong>⚠️ Important Note:</strong> Bryan Johnson's protocol is extreme and requires significant resources. Focus on the fundamental principles and adapt them to your lifestyle. Consistency with basics beats perfection with extremes.
+                    </div>
+
+                    <div style="background: #f9fafb; border-radius: 8px; padding: 1rem; margin-top: 1rem;">
+                        <h4>📚 Additional Resources:</h4>
+                        <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem;">
+                            <button class="button button-secondary" onclick="openResource('blueprint')" style="text-align: left;">
+                                📖 Blueprint Protocol Overview
+                            </button>
+                            <button class="button button-secondary" onclick="openResource('supplements')" style="text-align: left;">
+                                💊 Evidence-Based Supplements
+                            </button>
+                            <button class="button button-secondary" onclick="openResource('testing')" style="text-align: left;">
+                                🔬 Biomarker Testing Guide
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Analysis Tab -->
+                <div class="tab-panel" id="analysis">
+                    <div class="info-box blue">
+                        <h3>📊 Comprehensive Health Analysis</h3>
+                        <p>Deep dive into your health metrics and aging patterns.</p>
+                    </div>
+
+                    <div class="grid-2">
+                        <div style="text-align: center; padding: 1rem; background: #f0fdf4; border-radius: 8px;">
+                            <div style="font-size: 2rem; font-weight: 700; color: #166534;" id="overall-score">85</div>
+                            <div style="font-size: 0.875rem; color: #166534;">Overall Score</div>
+                        </div>
+                        <div style="text-align: center; padding: 1rem; background: #fef3c7; border-radius: 8px;">
+                            <div style="font-size: 2rem; font-weight: 700; color: #92400e;" id="cardiovascular-score">92</div>
+                            <div style="font-size: 0.875rem; color: #92400e;">Cardiovascular</div>
+                        </div>
+                        <div style="text-align: center; padding: 1rem; background: #dbeafe; border-radius: 8px;">
+                            <div style="font-size: 2rem; font-weight: 700; color: #1d4ed8;" id="cognitive-score">78</div>
+                            <div style="font-size: 0.875rem; color: #1d4ed8;">Cognitive</div>
+                        </div>
+                        <div style="text-align: center; padding: 1rem; background: #f3e8ff; border-radius: 8px;">
+                            <div style="font-size: 2rem; font-weight: 700; color: #7c3aed;" id="metabolic-score">88</div>
+                            <div style="font-size: 0.875rem; color: #7c3aed;">Metabolic</div>
+                        </div>
+                    </div>
+
+                    <div class="info-box green">
+                        <h4>🛡️ Protective Factors:</h4>
+                        <ul style="margin: 0.5rem 0; padding-left: 1.5rem;">
+                            <li>Regular exercise routine</li>
+                            <li>Optimal sleep duration</li>
+                            <li>Good vegetable intake</li>
+                            <li>No smoking</li>
+                            <li>Moderate alcohol consumption</li>
+                        </ul>
+                    </div>
+
+                    <div class="info-box" id="risk-factors">
+                        <h4>⚠️ Risk Factors:</h4>
+                        <ul style="margin: 0.5rem 0; padding-left: 1.5rem;">
+                            <li>Stress levels could be lower</li>
+                            <li>Could increase daily steps</li>
+                        </ul>
+                    </div>
+
+                    <div class="info-box gray">
+                        <h4>📈 Trend Analysis:</h4>
+                        <p>Based on your current lifestyle:</p>
+                        <ul style="margin: 0.5rem 0; padding-left: 1.5rem;">
+                            <li><strong>Short-term (3 months):</strong> Improved energy and mood</li>
+                            <li><strong>Medium-term (1 year):</strong> Better biomarkers and fitness</li>
+                            <li><strong>Long-term (5+ years):</strong> Reduced disease risk and slower aging</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Recommendations Tab -->
+                <div class="tab-panel" id="recommendations">
+                    <div class="info-box blue">
+                        <h3>💡 Personalized Recommendations</h3>
+                        <p>Science-based action items tailored to your current health profile.</p>
+                    </div>
+
+                    <div style="background: #f9fafb; border-radius: 8px; padding: 1rem; margin-bottom: 1rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <span><strong>Implementation Progress:</strong></span>
+                            <span id="implementation-progress">3/6 implemented</span>
+                        </div>
+                        <div class="progress-bar" style="margin-top: 0.5rem;">
+                            <div class="progress-fill" id="implementation-bar" style="width: 50%;"></div>
+                        </div>
+                    </div>
+
+                    <div id="recommendations-list">
+                        <!-- Recommendations will be populated by JavaScript -->
+                    </div>
+                </div>
+
+                <!-- Progress Tab -->
+                <div class="tab-panel" id="progress">
+                    <div class="info-box blue">
+                        <h3>📈 Progress Tracking</h3>
+                        <p>Long-term trends and improvements in your health metrics.</p>
+                    </div>
+
+                    <div class="info-box gray">
+                        <p>Progress tracking features will be available in future updates. This will include:</p>
+                        <ul style="margin: 0.5rem 0; padding-left: 1.5rem;">
+                            <li>Historical aging rate trends</li>
+                            <li>Biomarker progression charts</li>
+                            <li>Activity consistency graphs</li>
+                            <li>Health score evolution</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Settings Tab -->
+                <div class="tab-panel" id="settings">
+                    <h3 style="margin-bottom: 1rem;">🔔 Notification Settings</h3>
+                    
+                    <div class="notification-item">
+                        <div class="notification-info">
+                            <div class="notification-title">Bedtime Reminder</div>
+                            <div class="notification-time">21:30</div>
+                            <div style="font-size: 0.75rem; color: #6b7280;">Optimal sleep timing for recovery</div>
+                        </div>
+                        <button class="toggle-button active" id="bedtime-notification" onclick="toggleNotification('bedtime')"></button>
+                    </div>
+
+                    <div class="notification-item">
+                        <div class="notification-info">
+                            <div class="notification-title">Meditation Time</div>
+                            <div class="notification-time">07:00</div>
+                            <div style="font-size: 0.75rem; color: #6b7280;">Start your day with mindfulness</div>
+                        </div>
+                        <button class="toggle-button active" id="meditation-notification" onclick="toggleNotification('meditation')"></button>
+                    </div>
+
+                    <div class="notification-item">
+                        <div class="notification-info">
+                            <div class="notification-title">Exercise Reminder</div>
+                            <div class="notification-time">17:00</div>
+                            <div style="font-size: 0.75rem; color: #6b7280;">Time for physical activity</div>
+                        </div>
+                        <button class="toggle-button active" id="exercise-notification" onclick="toggleNotification('exercise')"></button>
+                    </div>
+
+                    <div class="notification-item">
+                        <div class="notification-info">
+                            <div class="notification-title">Nutrition Check</div>
+                            <div class="notification-time">12:00</div>
+                            <div style="font-size: 0.75rem; color: #6b7280;">Track your vegetable intake</div>
+                        </div>
+                        <button class="toggle-button active" id="nutrition-notification" onclick="toggleNotification('nutrition')"></button>
+                    </div>
+
+                    <div class="notification-item">
+                        <div class="notification-info">
+                            <div class="notification-title">Hydration Reminder</div>
+                            <div class="notification-time">Every 2 hours</div>
+                            <div style="font-size: 0.75rem; color: #6b7280;">Stay hydrated throughout the day</div>
+                        </div>
+                        <button class="toggle-button" id="hydration-notification" onclick="toggleNotification('hydration')"></button>
+                    </div>
+
+                    <div class="info-box blue" style="margin-top: 2rem;">
+                        <h4>📱 PWA Installation</h4>
+                        <p>Install VitalAge on your device for the best experience with offline access and push notifications.</p>
+                        <button class="button button-primary" onclick="installPWA()" style="margin-top: 0.5rem;">
+                            📲 Install App
+                        </button>
+                    </div>
+
+                    <div style="margin-top: 2rem; padding: 1rem; background: #f9fafb; border-radius: 8px;">
+                        <h4>⚙️ Data Management</h4>
+                        <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.5rem;">
+                            <button class="button button-secondary" onclick="exportData()">
+                                📤 Export Data
+                            </button>
+                            <button class="button button-secondary" onclick="importData()">
+                                📥 Import Data
+                            </button>
+                            <button class="button button-danger" onclick="clearAllData()">
+                                🗑️ Clear All Data
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scientific Info Modal -->
+    <div class="modal" id="scientific-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="modal-title">Scientific Explanation</h3>
+                <button class="close-button" onclick="closeModal()">&times;</button>
+            </div>
+            <div id="modal-body"></div>
+        </div>
+    </div>
+
+    <!-- Biological Age Visualization Modal -->
+    <div class="modal" id="bio-age-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">🧬 Biological Age Visualization</h3>
+                <button class="close-button" onclick="closeBioAgeModal()">&times;</button>
+            </div>
+            <div class="age-visualization">
+                <h4 style="text-align: center; margin-bottom: 1rem;">Age Timeline</h4>
+                <div class="age-timeline">
+                    <div class="age-marker" id="chronological-marker" data-age="35" style="left: 35%;"></div>
+                    <div class="age-marker" id="biological-marker" data-age="32" style="left: 32%; background: #3b82f6;"></div>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: #6b7280; margin-top: 0.5rem;">
+                    <span>20 years</span>
+                    <span>40 years</span>
+                    <span>60 years</span>
+                </div>
+                
+                <div style="text-align: center; margin: 2rem 0;">
+                    <div style="display: inline-block; margin: 0 1rem;">
+                        <div style="width: 12px; height: 12px; background: #1f2937; border-radius: 50%; display: inline-block; margin-right: 0.5rem;"></div>
+                        <span style="font-size: 0.875rem;">Chronological Age (35)</span>
+                    </div>
+                    <div style="display: inline-block; margin: 0 1rem;">
+                        <div style="width: 12px; height: 12px; background: #3b82f6; border-radius: 50%; display: inline-block; margin-right: 0.5rem;"></div>
+                        <span style="font-size: 0.875rem;">Biological Age (32)</span>
+                    </div>
+                </div>
+
+                <div class="speedometer">
+                    <div class="speedometer-arc"></div>
+                    <div class="speedometer-needle" id="aging-needle"></div>
+                    <div class="speedometer-center"></div>
+                    <div style="text-align: center; margin-top: 1rem;">
+                        <div style="font-size: 1.5rem; font-weight: 700; color: #10b981;">0.85x</div>
+                        <div style="font-size: 0.875rem; color: #6b7280;">Aging Rate</div>
+                    </div>
+                </div>
+
+                <div class="info-box green">
+                    <strong>🎉 Great News!</strong> Your biological age is 3 years younger than your chronological age. This means your body is aging 15% slower than average, potentially adding 7+ years to your lifespan.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // App State
+        let appState = {
+            activities: {
+                exercise: false,
+                meditation: false,
+                journaling: false
+            },
+            streaks: {
+                exercise: 5,
+                meditation: 3,
+                journaling: 7
+            },
+            userProfile: {
+                age: 35,
+                weight: 75,
+                height: 175,
+                sleepHours: 7.5,
+                vegetables: 6,
+                water: 8,
+                steps: 10000,
+                stressLevel: 4,
+                cigarettes: 0,
+                alcohol: 3,
+                exerciseMinutes: 45,
+                mood: 7,
+                energy: 8
+            },
+            supplements: ['Vitamin D3', 'Omega-3', 'Magnesium'],
+            notifications: {
+                bedtime: true,
+                meditation: true,
+                exercise: true,
+                nutrition: true,
+                hydration: false
+            },
+            journalEntry: '',
+            recommendations: [
+                {
+                    id: 'sleep-optimization',
+                    title: 'Sleep Optimization',
+                    description: 'Improve sleep quality and consistency',
+                    impact: 'High',
+                    difficulty: 'Easy',
+                    implemented: true,
+                    mechanism: 'Sleep is when your body repairs DNA, consolidates memories, and releases growth hormone.',
+                    requirements: '7-8.5 hours nightly, consistent schedule',
+                    steps: ['Set consistent bedtime', 'Create sleep ritual', 'Optimize bedroom environment']
+                },
+                {
+                    id: 'vegetable-increase',
+                    title: 'Increase Vegetable Intake',
+                    description: 'Boost antioxidants and fiber',
+                    impact: 'Medium',
+                    difficulty: 'Easy',
+                    implemented: false,
+                    mechanism: 'Vegetables provide antioxidants that neutralize free radicals and reduce cellular damage.',
+                    requirements: '8+ servings daily',
+                    steps: ['Add vegetables to every meal', 'Try new varieties weekly', 'Prep vegetables in advance']
+                },
+                {
+                    id: 'stress-management',
+                    title: 'Advanced Stress Management',
+                    description: 'Implement comprehensive stress reduction',
+                    impact: 'High',
+                    difficulty: 'Medium',
+                    implemented: true,
+                    mechanism: 'Chronic stress elevates cortisol, accelerating cellular aging and telomere shortening.',
+                    requirements: 'Daily meditation, stress monitoring',
+                    steps: ['20-minute daily meditation', 'Stress tracking', 'Breathing exercises']
+                }
+            ]
+        };
+
+        // Scientific explanations
+        const scientificInfo = {
+            exercise: {
+                title: "🏃‍♂️ Exercise & Longevity",
+                content: "Regular physical activity is one of the most powerful interventions for healthy aging and longevity.",
+                mechanism: "Exercise activates cellular repair mechanisms, improves mitochondrial function, reduces chronic inflammation, and stimulates the production of brain-derived neurotrophic factor (BDNF).",
+                dosage: "Minimum 150 minutes moderate activity per week or 75 minutes vigorous activity, plus 2+ strength training sessions.",
+                timeframe: "Initial improvements in 2-4 weeks, maximum benefits after 3-6 months of consistent training.",
+                references: ["Nature Medicine 2020", "Cell Metabolism 2019", "JAMA Internal Medicine 2018"]
+            },
+            meditation: {
+                title: "🧘‍♀️ Meditation & Stress Reduction",
+                content: "Meditation reduces chronic stress and slows cellular aging through multiple biological pathways.",
+                mechanism: "Activates the parasympathetic nervous system, reduces cortisol production, decreases inflammatory markers, and has been shown to lengthen telomeres.",
+                dosage: "10-20 minutes daily, preferably at the same time each day for consistency.",
+                timeframe: "Stress reduction within 1-2 weeks, structural brain changes after 8 weeks of regular practice.",
+                references: ["Psychoneuroendocrinology 2016", "PNAS 2013", "Psychiatry Research 2011"]
+            },
+            journaling: {
+                title: "📝 Journaling & Mental Health",
+                content: "Expressive writing improves emotional regulation, reduces stress, and supports mental well-being.",
+                mechanism: "Activates the prefrontal cortex, improves emotional processing, reduces rumination, and helps process traumatic experiences.",
+                dosage: "15-20 minutes daily, focusing on thoughts, feelings, and experiences.",
+                timeframe: "Emotional improvements within 1-2 weeks, long-term benefits after 1-3 months of consistent practice.",
+                references: ["Journal of Experimental Psychology 2006", "Advances in Psychiatric Treatment 2005", "Psychological Science 2013"]
+            }
+        };
+
+        // Emoji mappings
+        const moodEmojis = {
+            1: '😢', 2: '😞', 3: '😕', 4: '😐', 5: '😊', 
+            6: '😊', 7: '😊', 8: '😄', 9: '😁', 10: '🤩'
+        };
+
+        const energyEmojis = {
+            1: '😴', 2: '😪', 3: '😑', 4: '😐', 5: '🙂', 
+            6: '😊', 7: '😊', 8: '⚡', 9: '🔥', 10: '💪'
+        };
+
+        const stressEmojis = {
+            1: '😌', 2: '😌', 3: '🙂', 4: '😐', 5: '😕', 
+            6: '😟', 7: '😰', 8: '😨', 9: '😱', 10: '🤯'
+        };
+
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAppState();
+            updateUI();
+            setupEventListeners();
+            calculateMetrics();
+            registerServiceWorker();
+            updateRecommendations();
+        });
+
+        // Load state from localStorage
+        function loadAppState() {
+            const saved = localStorage.getItem('vitalage-state');
+            if (saved) {
+                try {
+                    const savedState = JSON.parse(saved);
+                    appState = { ...appState, ...savedState };
+                } catch (e) {
+                    console.error('Error loading saved state:', e);
+                }
+            }
+        }
+
+        // Save state to localStorage
+        function saveAppState() {
+            try {
+                localStorage.setItem('vitalage-state', JSON.stringify(appState));
+            } catch (e) {
+                console.error('Error saving state:', e);
+            }
+        }
+
+        // Update UI elements
+        function updateUI() {
+            // Update activity toggles
+            Object.keys(appState.activities).forEach(activity => {
+                const toggle = document.getElementById(`${activity}-toggle`);
+                const card = document.getElementById(`${activity}-card`);
+                if (toggle && card) {
+                    toggle.classList.toggle('active', appState.activities[activity]);
+                    card.classList.toggle('completed', appState.activities[activity]);
+                }
+            });
+
+            // Update streaks
+            Object.keys(appState.streaks).forEach(activity => {
+                const element = document.getElementById(`${activity}-streak`);
+                if (element) {
+                    element.textContent = appState.streaks[activity];
+                }
+            });
+
+            // Update supplements
+            updateSupplementsList();
+
+            // Update journal section visibility
+            const journalSection = document.getElementById('journal-section');
+            if (journalSection) {
+                journalSection.classList.toggle('hidden', !appState.activities.journaling);
+            }
+
+            // Update calculator values
+            Object.keys(appState.userProfile).forEach(key => {
+                const elementId = key.replace(/([A-Z])/g, '-$1').toLowerCase();
+                const element = document.getElementById(elementId);
+                if (element) {
+                    element.value = appState.userProfile[key];
+                    if (element.type === 'range') {
+                        updateSliderValue(element.id);
+                    }
+                }
+            });
+
+            // Update notification toggles
+            Object.keys(appState.notifications).forEach(type => {
+                const toggle = document.getElementById(`${type}-notification`);
+                if (toggle) {
+                    toggle.classList.toggle('active', appState.notifications[type]);
+                }
+            });
+
+            // Update journal entry
+            const journalEntry = document.getElementById('journal-entry');
+            if (journalEntry) {
+                journalEntry.value = appState.journalEntry || '';
+            }
+
+            // Update time inputs
+            const bedtime = document.getElementById('bedtime');
+            const waketime = document.getElementById('waketime');
+            if (bedtime) bedtime.value = appState.bedtime || '22:30';
+            if (waketime) waketime.value = appState.waketime || '06:30';
+
+            calculateSleepHours();
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Tab navigation
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.addEventListener('click', () => switchTab(button.dataset.tab));
+            });
+
+            // Header auto-hide
+            let lastScrollY = window.scrollY;
+            window.addEventListener('scroll', () => {
+                const header = document.getElementById('header');
+                if (window.scrollY > lastScrollY && window.scrollY > 100) {
+                    header.classList.add('hidden');
+                } else {
+                    header.classList.remove('hidden');
+                }
+                lastScrollY = window.scrollY;
+            });
+
+            // Close modals on outside click
+            document.getElementById('scientific-modal').addEventListener('click', (e) => {
+                if (e.target.id === 'scientific-modal') {
+                    closeModal();
+                }
+            });
+
+            document.getElementById('bio-age-modal').addEventListener('click', (e) => {
+                if (e.target.id === 'bio-age-modal') {
+                    closeBioAgeModal();
+                }
+            });
+        }
+
+        // Tab switching
+        function switchTab(tabName) {
+            // Update tab buttons
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.tab === tabName);
+            });
+
+            // Update tab panels
+            document.querySelectorAll('.tab-panel').forEach(panel => {
+                panel.classList.toggle('active', panel.id === tabName);
+            });
+        }
+
+        // Toggle activity
+        function toggleActivity(activity) {
+            appState.activities[activity] = !appState.activities[activity];
+            
+            // Update streak
+            if (appState.activities[activity]) {
+                appState.streaks[activity]++;
+            } else {
+                // Reset streak if activity is turned off
+                appState.streaks[activity] = 0;
+            }
+            
+            updateUI();
+            saveAppState();
+            calculateMetrics();
+            updateActivitySummary();
+        }
+
+        // Update slider values
+        function updateSliderValue(sliderId) {
+            const slider = document.getElementById(sliderId);
+            const valueElement = document.getElementById(`${sliderId}-value`);
+            if (slider && valueElement) {
+                valueElement.textContent = slider.value;
+                
+                // Update profile
+                const profileKey = sliderId.replace(/-([a-z])/g, (g) => g[1].toUpperCase());
+                if (appState.userProfile.hasOwnProperty(profileKey)) {
+                    appState.userProfile[profileKey] = parseFloat(slider.value);
+                }
+                
+                // Update optimal badges and emojis
+                updateOptimalBadges(sliderId, parseFloat(slider.value));
+                updateEmojis(sliderId, parseFloat(slider.value));
+            }
+        }
+
+        // Update optimal badges
+        function updateOptimalBadges(sliderId, value) {
+            const optimalElement = document.getElementById(`${sliderId}-optimal`);
+            const statusElement = document.getElementById(`${sliderId}-status`);
+            
+            if (sliderId === 'sleep-hours') {
+                if (optimalElement) {
+                    if (value >= 7 && value <= 8.5) {
+                        optimalElement.textContent = 'Optimal';
+                        optimalElement.className = 'badge badge-success';
+                    } else {
+                        optimalElement.textContent = 'Suboptimal';
+                        optimalElement.className = 'badge badge-warning';
+                    }
+                }
+            }
+            
+            if (sliderId === 'steps') {
+                if (optimalElement) {
+                    if (value >= 10000) {
+                        optimalElement.textContent = 'Optimal';
+                        optimalElement.className = 'badge badge-success';
+                    } else if (value >= 7500) {
+                        optimalElement.textContent = 'Good';
+                        optimalElement.className = 'badge badge-warning';
+                    } else {
+                        optimalElement.textContent = 'Needs Improvement';
+                        optimalElement.className = 'badge badge-danger';
+                    }
+                }
+            }
+
+            if (sliderId === 'cigarettes') {
+                if (statusElement) {
+                    if (value === 0) {
+                        statusElement.textContent = 'Excellent';
+                        statusElement.className = 'badge badge-success';
+                    } else if (value <= 5) {
+                        statusElement.textContent = 'Concerning';
+                        statusElement.className = 'badge badge-warning';
+                    } else {
+                        statusElement.textContent = 'High Risk';
+                        statusElement.className = 'badge badge-danger';
+                    }
+                }
+            }
+
+            if (sliderId === 'alcohol') {
+                if (statusElement) {
+                    if (value <= 7) {
+                        statusElement.textContent = 'Good';
+                        statusElement.className = 'badge badge-success';
+                    } else if (value <= 14) {
+                        statusElement.textContent = 'Moderate';
+                        statusElement.className = 'badge badge-warning';
+                    } else {
+                        statusElement.textContent = 'High Risk';
+                        statusElement.className = 'badge badge-danger';
+                    }
+                }
+            }
+        }
+
+        // Update emojis
+        function updateEmojis(sliderId, value) {
+            if (sliderId === 'mood') {
+                const emoji = document.getElementById('mood-emoji');
+                if (emoji) emoji.textContent = moodEmojis[Math.round(value)];
+            }
+            
+            if (sliderId === 'energy') {
+                const emoji = document.getElementById('energy-emoji');
+                if (emoji) emoji.textContent = energyEmojis[Math.round(value)];
+            }
+            
+            if (sliderId === 'stress-level') {
+                const emoji = document.getElementById('stress-emoji');
+                if (emoji) emoji.textContent = stressEmojis[Math.round(value)];
+            }
+        }
+
+        // Calculate sleep hours
+        function calculateSleepHours() {
+            const bedtime = document.getElementById('bedtime')?.value;
+            const waketime = document.getElementById('waketime')?.value;
+            
+            if (bedtime && waketime) {
+                const bedHour = parseInt(bedtime.split(':')[0]);
+                const bedMinute = parseInt(bedtime.split(':')[1]);
+                const wakeHour = parseInt(waketime.split(':')[0]);
+                const wakeMinute = parseInt(waketime.split(':')[1]);
+                
+                let sleepMinutes = (wakeHour * 60 + wakeMinute) - (bedHour * 60 + bedMinute);
+                if (sleepMinutes < 0) sleepMinutes += 24 * 60; // Handle overnight sleep
+                
+                const sleepHours = sleepMinutes / 60;
+                appState.userProfile.sleepHours = sleepHours;
+                appState.bedtime = bedtime;
+                appState.waketime = waketime;
+                
+                // Update sleep hours slider
+                const sleepSlider = document.getElementById('sleep-hours');
+                if (sleepSlider) {
+                    sleepSlider.value = sleepHours.toFixed(1);
+                    updateSliderValue('sleep-hours');
+                }
+                
+                calculateMetrics();
+                saveAppState();
+            }
+        }
+
+        // Add supplement
+        function addSupplement() {
+            const input = document.getElementById('supplement-input');
+            const supplement = input.value.trim();
+            if (supplement && !appState.supplements.includes(supplement)) {
+                appState.supplements.push(supplement);
+                input.value = '';
+                updateSupplementsList();
+                saveAppState();
+            }
+        }
+
+        // Handle supplement key press
+        function handleSupplementKeyPress(event) {
+            if (event.key === 'Enter') {
+                addSupplement();
+            }
+        }
+
+        // Update supplements list
+        function updateSupplementsList() {
+            const list = document.getElementById('supplements-list');
+            if (list) {
+                list.innerHTML = appState.supplements.map(supplement => 
+                    `<div style="display: flex; align-items: center; justify-content: space-between; padding: 0.5rem; background: #f3f4f6; border-radius: 6px; margin-bottom: 0.25rem;">
+                        <span>${supplement}</span>
+                        <button onclick="removeSupplement('${supplement}')" style="background: none; border: none; color: #ef4444; cursor: pointer; font-size: 1.2rem;">×</button>
+                    </div>`
+                ).join('');
+            }
+        }
+
+        // Remove supplement
+        function removeSupplement(supplement) {
+            appState.supplements = appState.supplements.filter(s => s !== supplement);
+            updateSupplementsList();
+            saveAppState();
+        }
+
+        // Save journal entry
+        function saveJournalEntry() {
+            const entry = document.getElementById('journal-entry')?.value;
+            appState.journalEntry = entry || '';
+            saveAppState();
+        }
+
+        // Calculate metrics
+        function calculateMetrics() {
+            const profile = appState.userProfile;
+            
+            // Calculate aging rate
+            let agingRate = 1.0;
+            
+            // Sleep factor (optimal: 7-8.5 hours)
+            const sleepDeviation = Math.abs(profile.sleepHours - 7.75);
+            agingRate += sleepDeviation * 0.03;
+            
+            // Nutrition factor
+            agingRate -= Math.min(profile.vegetables, 8) * 0.02;
+            
+            // Movement factor
+            agingRate -= Math.min(profile.steps / 1000, 15) * 0.01;
+            agingRate -= Math.min(profile.exerciseMinutes, 90) * 0.003;
+            
+            // Stress factor
+            agingRate += (profile.stressLevel - 1) * 0.03;
+            
+            // Mood and energy factor
+            const wellbeingScore = (profile.mood + profile.energy) / 2;
+            agingRate -= (wellbeingScore - 5) * 0.01;
+            
+            // Negative factors
+            agingRate += profile.cigarettes * 0.08;
+            agingRate += profile.alcohol * 0.015;
+            
+            // Activity consistency bonus
+            const activeActivities = Object.values(appState.activities).filter(Boolean).length;
+            const consistencyBonus = (activeActivities / 3) * 0.15;
+            agingRate -= consistencyBonus;
+            
+            // Supplement bonus
+            const supplementBonus = Math.min(appState.supplements.length, 5) * 0.01;
+            agingRate -= supplementBonus;
+            
+            // Bounds
+            agingRate = Math.max(0.5, Math.min(1.5, agingRate));
+            
+            // Calculate biological age
+            const chronologicalAge = profile.age;
+            const biologicalAge = Math.round(chronologicalAge * agingRate);
+            
+            // Calculate life expectancy
+            const baseLifeExpectancy = 82;
+            const ageAdjustment = (1.0 - agingRate) * 30;
+            const lifeExpectancy = Math.round(baseLifeExpectancy + ageAdjustment);
+            
+            // Calculate health score
+            const healthScore = Math.round(Math.max(0, Math.min(100, 100 - (agingRate - 0.5) * 100)));
+            
+            // Update UI
+            document.getElementById('aging-rate-value').textContent = agingRate.toFixed(2) + 'x';
+            document.getElementById('biological-age-value').textContent = biologicalAge;
+            document.getElementById('health-score-value').textContent = healthScore;
+            document.getElementById('life-expectancy-value').textContent = lifeExpectancy;
+            
+            // Update age difference
+            const ageDifference = chronologicalAge - biologicalAge;
+            const ageDiffElement = document.getElementById('age-difference');
+            if (ageDiffElement) {
+                if (ageDifference > 0) {
+                    ageDiffElement.textContent = `${ageDifference} years younger`;
+                    ageDiffElement.style.color = '#10b981';
+                } else if (ageDifference < 0) {
+                    ageDiffElement.textContent = `${Math.abs(ageDifference)} years older`;
+                    ageDiffElement.style.color = '#ef4444';
+                } else {
+                    ageDiffElement.textContent = 'Same as chronological';
+                    ageDiffElement.style.color = '#6b7280';
+                }
+            }
+            
+            // Update life expectancy gain
+            const expectancyGain = lifeExpectancy - baseLifeExpectancy;
+            const expectancyElement = document.getElementById('expectancy-gain');
+            if (expectancyElement) {
+                if (expectancyGain > 0) {
+                    expectancyElement.textContent = `+${expectancyGain} years gained`;
+                    expectancyElement.style.color = '#10b981';
+                } else if (expectancyGain < 0) {
+                    expectancyElement.textContent = `${expectancyGain} years lost`;
+                    expectancyElement.style.color = '#ef4444';
+                } else {
+                    expectancyElement.textContent = 'Average expectancy';
+                    expectancyElement.style.color = '#6b7280';
+                }
+            }
+            
+            // Update header badges
+            document.getElementById('health-score-badge').textContent = healthScore + '/100';
+            document.getElementById('aging-rate-badge').textContent = agingRate.toFixed(2) + 'x';
+            
+            // Update aging status
+            const agingStatus = document.getElementById('aging-status');
+            if (agingStatus) {
+                if (agingRate <= 0.8) {
+                    agingStatus.textContent = 'Excellent';
+                    agingStatus.className = 'badge badge-success';
+                } else if (agingRate <= 1.0) {
+                    agingStatus.textContent = 'Good';
+                    agingStatus.className = 'badge badge-info';
+                } else if (agingRate <= 1.2) {
+                    agingStatus.textContent = 'Fair';
+                    agingStatus.className = 'badge badge-warning';
+                } else {
+                    agingStatus.textContent = 'Needs Improvement';
+                    agingStatus.className = 'badge badge-danger';
+                }
+            }
+            
+            // Update progress bar
+            const progressBar = document.getElementById('health-progress');
+            if (progressBar) {
+                progressBar.style.width = healthScore + '%';
+            }
+            
+            // Update calculator display
+            document.getElementById('calc-bio-age').textContent = biologicalAge + ' years';
+            document.getElementById('calc-aging-rate').textContent = agingRate.toFixed(2) + 'x normal';
+            document.getElementById('calc-life-exp').textContent = lifeExpectancy + ' years';
+            
+            // Update analysis scores
+            updateAnalysisScores(profile, agingRate, healthScore);
+            
+            // Update biomarkers
+            updateBiomarkers(profile, agingRate);
+            
+            updateActivitySummary();
+            saveAppState();
+        }
+
+        // Update activity summary
+        function updateActivitySummary() {
+            const activeCount = Object.values(appState.activities).filter(Boolean).length;
+            const bestStreak = Math.max(...Object.values(appState.streaks));
+            const agingReduction = (activeCount / 3) * 0.15;
+            
+            document.getElementById('activities-today').textContent = `${activeCount}/3`;
+            document.getElementById('best-streak').textContent = bestStreak;
+            document.getElementById('aging-reduction').textContent = '-' + agingReduction.toFixed(2);
+        }
+
+        // Update analysis scores
+        function updateAnalysisScores(profile, agingRate, healthScore) {
+            // Cardiovascular score
+            const cardioScore = Math.round(100 - (agingRate - 0.5) * 80 + (profile.exerciseMinutes / 60) * 20);
+            document.getElementById('cardiovascular-score').textContent = Math.max(0, Math.min(100, cardioScore));
+            
+            // Cognitive score
+            const cognitiveScore = Math.round(100 - (profile.stressLevel - 1) * 8 + (profile.sleepHours - 4) * 10);
+            document.getElementById('cognitive-score').textContent = Math.max(0, Math.min(100, cognitiveScore));
+            
+            // Metabolic score
+            const bmi = profile.weight / ((profile.height / 100) ** 2);
+            const metabolicScore = Math.round(100 - Math.abs(bmi - 22) * 5 + profile.vegetables * 2);
+            document.getElementById('metabolic-score').textContent = Math.max(0, Math.min(100, metabolicScore));
+            
+            document.getElementById('overall-score').textContent = healthScore;
+        }
+
+        // Update biomarkers
+        function updateBiomarkers(profile, agingRate) {
+            // Resting Heart Rate (lower is better)
+            const baseRHR = 70;
+            const rhr = Math.round(baseRHR - (profile.exerciseMinutes / 10) + (agingRate - 1) * 15);
+            document.getElementById('rhr-value').textContent = Math.max(45, Math.min(100, rhr)) + ' bpm';
+            
+            // VO2 Max (higher is better)
+            const baseVO2 = 35;
+            const vo2 = Math.round(baseVO2 + (profile.exerciseMinutes / 5) - (agingRate - 1) * 20);
+            document.getElementById('vo2-value').textContent = Math.max(20, Math.min(70, vo2)) + ' ml/kg/min';
+            
+            // HbA1c (lower is better)
+            const baseHbA1c = 5.7;
+            const hba1c = (baseHbA1c - (profile.vegetables * 0.05) + (agingRate - 1) * 0.8).toFixed(1);
+            document.getElementById('hba1c-value').textContent = Math.max(4.5, Math.min(8.0, hba1c)) + '%';
+            
+            // CRP (lower is better)
+            const baseCRP = 2.0;
+            const crp = (baseCRP - (profile.exerciseMinutes / 30) + (agingRate - 1) * 1.5).toFixed(1);
+            document.getElementById('crp-value').textContent = Math.max(0.1, Math.min(10.0, crp)) + ' mg/L';
+        }
+
+        // Set optimal values
+        function setOptimalValues() {
+            document.getElementById('sleep-hours').value = 7.5;
+            document.getElementById('vegetables').value = 8;
+            document.getElementById('steps').value = 12000;
+            document.getElementById('exercise-minutes').value = 60;
+            document.getElementById('stress-level').value = 3;
+            document.getElementById('cigarettes').value = 0;
+            document.getElementById('alcohol').value = 2;
+            
+            // Update all slider displays
+            ['sleep-hours', 'vegetables', 'steps', 'exercise-minutes', 'stress-level', 'cigarettes', 'alcohol'].forEach(id => {
+                updateSliderValue(id);
+            });
+            
+            calculateMetrics();
+        }
+
+        // Reset to defaults
+        function resetToDefaults() {
+            document.getElementById('age').value = 35;
+            document.getElementById('weight').value = 75;
+            document.getElementById('height').value = 175;
+            document.getElementById('sleep-hours').value = 7.5;
+            document.getElementById('vegetables').value = 6;
+            document.getElementById('steps').value = 10000;
+            document.getElementById('exercise-minutes').value = 45;
+            document.getElementById('stress-level').value = 4;
+            document.getElementById('cigarettes').value = 0;
+            document.getElementById('alcohol').value = 3;
+            
+            ['sleep-hours', 'vegetables', 'steps', 'exercise-minutes', 'stress-level', 'cigarettes', 'alcohol'].forEach(id => {
+                updateSliderValue(id);
+            });
+            
+            calculateMetrics();
+        }
+
+        // Show scientific info
+        function showScientificInfo(topic) {
+            const info = scientificInfo[topic];
+            if (!info) return;
+            
+            const modal = document.getElementById('scientific-modal');
+            const title = document.getElementById('modal-title');
+            const body = document.getElementById('modal-body');
+            
+            title.textContent = info.title;
+            body.innerHTML = `
+                <div class="info-box blue">
+                    <p><strong>${info.content}</strong></p>
+                </div>
+                <h4>🔬 How it works:</h4>
+                <p>${info.mechanism}</p>
+                <h4>💊 Optimal dosage:</h4>
+                <p>${info.dosage}</p>
+                <h4>⏱️ Timeline:</h4>
+                <p>${info.timeframe}</p>
+                <h4>📚 References:</h4>
+                <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.5rem;">
+                    ${info.references.map(ref => `<span class="badge badge-info">${ref}</span>`).join('')}
+                </div>
+                <div class="info-box" style="margin-top: 1rem;">
+                    <small><strong>Disclaimer:</strong> This information is for educational purposes only and does not replace medical advice.</small>
+                </div>
+            `;
+            
+            modal.classList.add('active');
+        }
+
+        // Close modal
+        function closeModal() {
+            document.getElementById('scientific-modal').classList.remove('active');
+        }
+
+        // Show biological age visualization
+        function showBiologicalAgeViz() {
+            const modal = document.getElementById('bio-age-modal');
+            const chronologicalAge = appState.userProfile.age;
+            const biologicalAge = parseInt(document.getElementById('biological-age-value').textContent);
+            
+            // Update timeline markers
+            const chronoMarker = document.getElementById('chronological-marker');
+            const bioMarker = document.getElementById('biological-marker');
+            
+            if (chronoMarker && bioMarker) {
+                const chronoPercent = Math.min(Math.max((chronologicalAge - 20) / 40 * 100, 5), 95);
+                const bioPercent = Math.min(Math.max((biologicalAge - 20) / 40 * 100, 5), 95);
+                
+                chronoMarker.style.left = chronoPercent + '%';
+                chronoMarker.setAttribute('data-age', chronologicalAge);
+                
+                bioMarker.style.left = bioPercent + '%';
+                bioMarker.setAttribute('data-age', biologicalAge);
+            }
+            
+            // Update speedometer needle
+            const needle = document.getElementById('aging-needle');
+            const agingRate = parseFloat(document.getElementById('aging-rate-value').textContent);
+            if (needle) {
+                // Convert aging rate to angle (0.5 = -90deg, 1.0 = 0deg, 1.5 = 90deg)
+                const angle = (agingRate - 1.0) * 90;
+                needle.style.transform = `rotate(${angle}deg)`;
+            }
+            
+            modal.classList.add('active');
+        }
+
+        // Close biological age modal
+        function closeBioAgeModal() {
+            document.getElementById('bio-age-modal').classList.remove('active');
+        }
+
+        // Show aging rate details
+        function showAgingRateDetails() {
+            showScientificInfo('exercise'); // Placeholder - could show detailed aging rate explanation
+        }
+
+        // Show health score details
+        function showHealthScoreDetails() {
+            switchTab('analysis');
+        }
+
+        // Show life expectancy details
+        function showLifeExpectancyDetails() {
+            showBiologicalAgeViz();
+        }
+
+        // Toggle notification
+        function toggleNotification(type) {
+            appState.notifications[type] = !appState.notifications[type];
+            
+            // Update UI
+            const button = document.getElementById(`${type}-notification`);
+            if (button) {
+                button.classList.toggle('active', appState.notifications[type]);
+            }
+            
+            // Request permission if enabling notifications
+            if (appState.notifications[type] && 'Notification' in window) {
+                Notification.requestPermission().then(permission => {
+                    if (permission === 'granted') {
+                        console.log('Notification permission granted');
+                    }
+                });
+            }
+            
+            saveAppState();
+        }
+
+        // Play video (placeholder)
+        function playVideo() {
+            alert('Video would play here. In a real app, this would embed a YouTube video or open an external link.');
+        }
+
+        // Open resource
+        function openResource(type) {
+            const resources = {
+                blueprint: 'https://protocol.bryanjohnson.co/',
+                supplements: 'https://examine.com/',
+                testing: 'https://www.foundmyfitness.com/topics/biomarkers'
+            };
+            
+            if (resources[type]) {
+                window.open(resources[type], '_blank');
+            } else {
+                alert(`${type} resource would open here.`);
+            }
+        }
+
+        // Update recommendations
+        function updateRecommendations() {
+            const recommendationsList = document.getElementById('recommendations-list');
+            if (!recommendationsList) return;
+            
+            const implementedCount = appState.recommendations.filter(r => r.implemented).length;
+            const totalCount = appState.recommendations.length;
+            
+            // Update progress
+            document.getElementById('implementation-progress').textContent = `${implementedCount}/${totalCount} implemented`;
+            document.getElementById('implementation-bar').style.width = `${(implementedCount / totalCount) * 100}%`;
+            
+            // Generate recommendation cards
+            recommendationsList.innerHTML = appState.recommendations.map(rec => `
+                <div class="activity-card" style="margin-bottom: 1rem;">
+                    <div class="activity-header">
+                        <div class="activity-title">${rec.title}</div>
+                        <button class="toggle-button ${rec.implemented ? 'active' : ''}" onclick="toggleRecommendation('${rec.id}')"></button>
+                    </div>
+                    <p style="color: #6b7280; margin: 0.5rem 0;">${rec.description}</p>
+                    <div style="display: flex; gap: 0.5rem; margin: 0.5rem 0;">
+                        <span class="badge badge-${rec.impact === 'High' ? 'danger' : rec.impact === 'Medium' ? 'warning' : 'info'}">${rec.impact} Impact</span>
+                        <span class="badge badge-${rec.difficulty === 'Easy' ? 'success' : rec.difficulty === 'Medium' ? 'warning' : 'danger'}">${rec.difficulty}</span>
+                    </div>
+                    <div class="info-box blue" style="margin: 0.5rem 0;">
+                        <strong>🔬 Mechanism:</strong> ${rec.mechanism}
+                    </div>
+                    <div style="color: #ef4444; font-size: 0.875rem; margin: 0.5rem 0;">
+                        <strong>Daily Requirements:</strong> ${rec.requirements}
+                    </div>
+                    <div style="margin: 0.5rem 0;">
+                        <strong>Implementation Steps:</strong>
+                        <ol style="margin: 0.25rem 0; padding-left: 1.5rem;">
+                            ${rec.steps.map(step => `<li>${step}</li>`).join('')}
+                        </ol>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Toggle recommendation
+        function toggleRecommendation(id) {
+            const recommendation = appState.recommendations.find(r => r.id === id);
+            if (recommendation) {
+                recommendation.implemented = !recommendation.implemented;
+                updateRecommendations();
+                saveAppState();
+            }
+        }
+
+        // Install PWA
+        let deferredPrompt;
+        
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+        });
+        
+        function installPWA() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('PWA installed successfully');
+                    }
+                    deferredPrompt = null;
+                });
+            } else {
+                alert('To install this app:\n\n• Chrome/Edge: Click the install icon in the address bar\n• Safari: Tap Share → Add to Home Screen\n• Firefox: Open menu → Install');
+            }
+        }
+
+        // Data management functions
+        function exportData() {
+            const dataStr = JSON.stringify(appState, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = 'vitalage-data.json';
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        try {
+                            const importedData = JSON.parse(e.target.result);
+                            appState = { ...appState, ...importedData };
+                            updateUI();
+                            calculateMetrics();
+                            saveAppState();
+                            alert('Data imported successfully!');
+                        } catch (error) {
+                            alert('Error importing data. Please check the file format.');
+                        }
+                    };
+                    reader.readAsText(file);
+                }
+            };
+            input.click();
+        }
+
+        function clearAllData() {
+            if (confirm('Are you sure you want to clear all data? This action cannot be undone.')) {
+                localStorage.removeItem('vitalage-state');
+                location.reload();
+            }
+        }
+
+        // Register service worker
+        function registerServiceWorker() {
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('sw.js')
+                    .then(registration => {
+                        console.log('Service Worker registered successfully');
+                        
+                        // Schedule notifications
+                        if (registration.active) {
+                            scheduleNotifications();
+                        }
+                    })
+                    .catch(error => {
+                        console.log('Service Worker registration failed:', error);
+                    });
+            }
+        }
+
+        // Schedule notifications
+        function scheduleNotifications() {
+            if ('serviceWorker' in navigator && 'Notification' in window) {
+                const notifications = [
+                    { type: 'bedtime', time: '21:30', message: '🛏️ Time for bed! Quality sleep is essential for longevity.' },
+                    { type: 'meditation', time: '07:00', message: '🧘‍♀️ Morning meditation time! Start your day mindfully.' },
+                    { type: 'exercise', time: '17:00', message: '🏃‍♂️ Movement is life! Time for your workout.' },
+                    { type: 'nutrition', time: '12:00', message: '🥬 Nutrition check! Have you had enough vegetables today?' }
+                ];
+                
+                notifications.forEach(notif => {
+                    if (appState.notifications[notif.type]) {
+                        console.log(`Notification scheduled: ${notif.message} at ${notif.time}`);
+                        // In a real implementation, you would use the Push API here
+                    }
+                });
+            }
+        }
+
+        // Initialize notifications on load
+        setTimeout(() => {
+            scheduleNotifications();
+            
+            // Show a welcome notification if supported
+            if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification('VitalAge', {
+                    body: 'Welcome to your biological age optimization journey!',
+                    icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23ef4444"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>'
+                });
+            }
+        }, 2000);
+    </script>
+</body>
+</html>
