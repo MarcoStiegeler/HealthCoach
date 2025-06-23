@@ -1,1 +1,1 @@
-![Logo](app.png)
+![Logo](App.png)
