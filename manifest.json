@@ -2,7 +2,7 @@
   "name": "VitalAge - Biological Age Optimizer",
   "short_name": "VitalAge",
   "description": "Science-based longevity optimization through personalized health tracking and biological age calculation",
-  "start_url": "/",
+  "start_url": "https://marcostiegeler.github.io/HealthCoach/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#3b82f6",
